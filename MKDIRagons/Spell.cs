@@ -13,6 +13,33 @@
         public string Description { get; set; } = string.Empty;
         public string Upcast { get; set; } = string.Empty;
 
+        public Spell()
+        {
+        }
+        public Spell(
+            string name,
+            string source,
+            string level,
+            string school,
+            string castingtime,
+            string range,
+            string components,
+            string duration,
+            string description,
+            string upcast)
+        {
+            Name = name;
+            Source = source;
+            Level = level;
+            School = school;
+            CastingTime = castingtime;
+            Range = range;
+            Components = components;
+            Duration = duration;
+            Description = description;
+            Upcast = upcast;
+        }
+
 
         public void AddFieldData(string fieldName, string? newFieldData)
         {
@@ -64,7 +91,7 @@
             }
         }
 
-        public void FieldChecker(string fieldName, string oldFieldData)
+        public void ReplaceField(string fieldName, string oldFieldData)
         {
             Console.WriteLine($"No spell {oldFieldData} found.");
             Console.WriteLine("Do you want to add this?");
@@ -74,7 +101,7 @@
             string? check = Console.ReadLine();
             if (check == null)
             {
-                // Handle null case, null treated as ""
+                // Handle null case, null treated as "N/A"
                 check = "N/A";
             }
             check = check.ToUpper();
@@ -100,13 +127,51 @@
                 }
             }
         }
-        public void CheckAndPrintField(string fieldName, string fieldValue)
+        public void CheckAndPrintFields(string? specificField = null)
+        {
+            var fields = new Dictionary<string, string>
+            {
+                { "Name", Name },
+                { "Source", Source },
+                { "Level", Level },
+                { "School", School },
+                { "CastingTime", CastingTime },
+                { "Range", Range },
+                { "Components", Components },
+                { "Duration", Duration },
+                { "Description", Description },
+                { "Upcast", Upcast }
+            };
+
+            if (specificField != null)
+            {
+                // If a specific field is provided, only check and print that field
+                if (fields.TryGetValue(specificField, out string? value))
+                {
+                    CheckAndPrintSingleField(specificField, value);
+                }
+                else
+                {
+                    Console.WriteLine($"Field {specificField} not found.");
+                }
+            }
+            else
+            {
+                // If no specific field is provided, check and print all fields
+                foreach (var field in fields)
+                {
+                    CheckAndPrintSingleField(field.Key, field.Value);
+                }
+            }
+        }
+
+        private void CheckAndPrintSingleField(string fieldName, string fieldValue)
         {
             if (string.IsNullOrEmpty(fieldValue))
             {
-                FieldChecker(fieldName, fieldValue);
+                ReplaceField(fieldName, fieldValue);
             }
-            Console.WriteLine($"{fieldValue}\n");
+            Console.WriteLine($"{fieldName}: {fieldValue}\n");
         }
     }
 }

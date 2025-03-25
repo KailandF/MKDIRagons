@@ -8,23 +8,23 @@ namespace MKDIRagons
         public async Task<Spell> ScrapeSpellAsync(string spell)
         {
             // Convert the user inputed spell into a URL-friendly form.
-            // No spaces allowed, and must be lowercase
             string spellName = spell.Replace(" ", "-").ToLower();
 
             using HttpClient client = new HttpClient();
 
             // Access wikidot using the spellname
-            // TODO: Add other source options
             string html = await client.GetStringAsync($"https://dnd5e.wikidot.com/spell:{spellName}");
 
             // Open web page
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(html);
 
+            // Create and populate spell object
+            return PopulateSpellFromDocument(doc);
+        }
 
-            /////////////////////////////// Set Fields ///////////////////////////////
-
-            // Spell obj has fields Name, Section (spell description + level)
+        private Spell PopulateSpellFromDocument(HtmlDocument doc)
+        {
             Spell spellObj = new Spell();
 
             // Set spell name
@@ -40,12 +40,24 @@ namespace MKDIRagons
             }
 
             // Extract spell level and school
-            var levelSchoolNode = doc.DocumentNode.SelectSingleNode("//em[contains(text(), '-level') or contains(text(), ' Cantrip')]");
-            string levelSchoolText = levelSchoolNode.InnerText.Trim();
+            SetLevelAndSchool(doc, spellObj);
+            SetCastingTime(doc, spellObj);
+            SetRange(doc, spellObj);
+            SetComponents(doc, spellObj);
+            SetDuration(doc, spellObj);
+            SetDescription(doc, spellObj);
+            SetUpcast(doc, spellObj);
 
-            // Use regex to separate level and school
-            if (!string.IsNullOrEmpty(levelSchoolText))
+            return spellObj;
+        }
+
+        private void SetLevelAndSchool(HtmlDocument doc, Spell spellObj)
+        {
+            var levelSchoolNode = doc.DocumentNode.SelectSingleNode("//em[contains(text(), '-level') or contains(text(), ' Cantrip')]");
+            if (levelSchoolNode != null)
             {
+                string levelSchoolText = levelSchoolNode.InnerText.Trim();
+
                 // Handle X-level format
                 var levelMatch = Regex.Match(levelSchoolText, @"(\d+)(?:st|nd|rd|th)-level (\w+)");
                 if (levelMatch.Success)
@@ -53,7 +65,6 @@ namespace MKDIRagons
                     spellObj.Level = levelMatch.Groups[1].Value + "-level";
                     spellObj.School = levelMatch.Groups[2].Value;
                 }
-
                 // Handle Cantrip format
                 else
                 {
@@ -65,43 +76,55 @@ namespace MKDIRagons
                     }
                 }
             }
+        }
 
-            // Set spell casting time
+        private void SetCastingTime(HtmlDocument doc, Spell spellObj)
+        {
             var castingTimeNode = doc.DocumentNode.SelectSingleNode("//strong[contains(text(), 'Casting Time:')]/following-sibling::text()[1]");
             if (castingTimeNode != null)
             {
                 spellObj.CastingTime = castingTimeNode.InnerText.Trim();
             }
+        }
 
-            // Set spell Range
+        private void SetRange(HtmlDocument doc, Spell spellObj)
+        {
             var rangeNode = doc.DocumentNode.SelectSingleNode("//strong[contains(text(), 'Range:')]/following-sibling::text()[1]");
             if (rangeNode != null)
             {
                 spellObj.Range = rangeNode.InnerText.Trim();
             }
+        }
 
-            // Set spell Components
+        private void SetComponents(HtmlDocument doc, Spell spellObj)
+        {
             var componentsNode = doc.DocumentNode.SelectSingleNode("//strong[contains(text(), 'Components:')]/following-sibling::text()[1]");
             if (componentsNode != null)
             {
                 spellObj.Components = componentsNode.InnerText.Trim();
             }
+        }
 
-            // Set spell Duration
+        private void SetDuration(HtmlDocument doc, Spell spellObj)
+        {
             var durationNode = doc.DocumentNode.SelectSingleNode("//strong[contains(text(), 'Duration:')]/following-sibling::text()[1]");
             if (durationNode != null)
             {
                 spellObj.Duration = durationNode.InnerText.Trim();
             }
+        }
 
-            // Set spell Description
+        private void SetDescription(HtmlDocument doc, Spell spellObj)
+        {
             var descriptionNode = doc.DocumentNode.SelectSingleNode("//strong[contains(text(), 'Duration:')]/parent::p/following-sibling::p");
             if (descriptionNode != null)
             {
                 spellObj.Description = descriptionNode.InnerText.Trim();
             }
+        }
 
-            // Set Upcast properties
+        private void SetUpcast(HtmlDocument doc, Spell spellObj)
+        {
             var upcastNode = doc.DocumentNode.SelectSingleNode("//p[contains(text(), 'At Higher Levels.')]");
             if (upcastNode != null)
             {
@@ -112,12 +135,10 @@ namespace MKDIRagons
                     spellObj.Upcast = match.Groups[1].Value.Trim();
                 }
             }
-            else
+            else // If spell has no upcast feature
             {
                 spellObj.Upcast = "N/A";
             }
-
-            return spellObj;
         }
     }
 }

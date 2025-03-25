@@ -1,4 +1,6 @@
 ﻿using System.CommandLine;
+using System.Reflection.Emit;
+using System.Xml.Linq;
 
 namespace MKDIRagons
 {
@@ -8,14 +10,14 @@ namespace MKDIRagons
 
         public RootCommand BuildRootCommand()
         {
+            var rootCommand = new RootCommand("=== D&D 5e Spell Scraper CLI ===");
             var spellOption = new Option<string>("--spell", "The spell to scrape") { IsRequired = true };
-            var rootCommand = new RootCommand("D&D 5e Spell Scraper CLI");
             rootCommand.AddOption(spellOption);
 
             rootCommand.SetHandler(async (string spell) =>
             {
                 var spellObj = await _scraper.ScrapeSpellAsync(spell);
-                spellObj.PrintSection();
+                spellObj.CheckAndPrintFields();
             }, spellOption);
 
             return rootCommand;

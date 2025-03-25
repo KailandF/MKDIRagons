@@ -1,10 +1,14 @@
 ﻿using System.Data.SQLite;
 
+// TODO: Add error handling
 namespace MKDIRagons
 {
-    internal class CharacterDbHandler
+    internal class CharacterDbHandler : IDisposable
     {
         private readonly SQLiteConnection _connection;
+
+        // Tracks if an object has been disposed of already
+        private bool _disposed = false;
 
         public CharacterDbHandler(SQLiteConnection connection)
         {
@@ -17,16 +21,16 @@ namespace MKDIRagons
             string createTableQuery = @"
                 CREATE TABLE IF NOT EXISTS Characters (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Name TEXT NOT NULL,
+                    Name TEXT NOT NULL UNIQUE,
                     Race TEXT NOT NULL,
                     Class TEXT NOT NULL,
-                    Level INTEGER NOT NULL DEFAULT 1,
-                    Strength INTEGER NOT NULL DEFAULT 10,
-                    Dexterity INTEGER NOT NULL DEFAULT 10,
-                    Constitution INTEGER NOT NULL DEFAULT 10,
-                    Intelligence INTEGER NOT NULL DEFAULT 10,
-                    Wisdom INTEGER NOT NULL DEFAULT 10,
-                    Charisma INTEGER NOT NULL DEFAULT 10
+                    Level TEXT NOT NULL DEFAULT '1',
+                    Strength TEXT NOT NULL DEFAULT '10',
+                    Dexterity TEXT NOT NULL DEFAULT '10',
+                    Constitution TEXT NOT NULL DEFAULT '10',
+                    Intelligence TEXT NOT NULL DEFAULT '10',
+                    Wisdom TEXT NOT NULL DEFAULT '10',
+                    Charisma TEXT NOT NULL DEFAULT '10'
                 );";
 
             using var command = new SQLiteCommand(createTableQuery, _connection);
@@ -55,16 +59,16 @@ namespace MKDIRagons
             command.ExecuteNonQuery();
         }
         public void UpdateCharacter(
-            SQLiteConnection connection, 
-            string name, 
-            string race, 
-            string characterClass, 
-            int level, 
-            int strength, 
-            int dexterity, 
-            int constitution, 
-            int intelligence, 
-            int wisdom, 
+            SQLiteConnection connection,
+            string name,
+            string race,
+            string characterClass,
+            int level,
+            int strength,
+            int dexterity,
+            int constitution,
+            int intelligence,
+            int wisdom,
             int charisma)
         {
             string updateQuery = @"
@@ -95,9 +99,15 @@ namespace MKDIRagons
             command.Parameters.AddWithValue("@charisma", charisma);
             command.ExecuteNonQuery();
         }
-        public List<Character> RetrieveCharacters()
+        public List<Character> RetrieveCharacters(string? searchTerm = null)
         {
             string selectQuery = "SELECT * FROM Characters";
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                // Better searching for Characters. Now supports searching by Name, Race, or Class
+                selectQuery += " WHERE Name LIKE @searchTerm OR Race LIKE @searchTerm OR Class LIKE @searchTerm";
+            }
+
             using var command = new SQLiteCommand(selectQuery, _connection);
             using var reader = command.ExecuteReader();
 
@@ -108,13 +118,13 @@ namespace MKDIRagons
                     reader["Name"].ToString()!,
                     reader["Race"].ToString()!,
                     reader["Class"].ToString()!,
-                    Convert.ToInt32(reader["Level"]),
-                    Convert.ToInt32(reader["Strength"]),
-                    Convert.ToInt32(reader["Dexterity"]),
-                    Convert.ToInt32(reader["Constitution"]),
-                    Convert.ToInt32(reader["Intelligence"]),
-                    Convert.ToInt32(reader["Wisdom"]),
-                    Convert.ToInt32(reader["Charisma"])
+                    reader["Level"].ToString()!,
+                    reader["Strength"].ToString()!,
+                    reader["Dexterity"].ToString()!,
+                    reader["Constitution"].ToString()!,
+                    reader["Intelligence"].ToString()!,
+                    reader["Wisdom"].ToString()!,
+                    reader["Charisma"].ToString()!
                 );
                 characters.Add(character);
             }
@@ -126,6 +136,25 @@ namespace MKDIRagons
             using var command = new SQLiteCommand(deleteQuery, _connection);
             command.Parameters.AddWithValue("@name", character.Name);
             command.ExecuteNonQuery();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _connection?.Close();
+                    _connection?.Dispose();
+                }
+                _disposed = true;
+            }
         }
     }
 }
