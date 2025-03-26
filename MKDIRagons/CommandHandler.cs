@@ -1,6 +1,4 @@
 ﻿using System.CommandLine;
-using System.Reflection.Emit;
-using System.Xml.Linq;
 
 namespace MKDIRagons
 {
@@ -8,17 +6,33 @@ namespace MKDIRagons
     {
         private readonly SpellScraper _scraper = new SpellScraper();
 
-        public RootCommand BuildRootCommand()
+        public static RootCommand BuildRootCommand()
         {
-            var rootCommand = new RootCommand("=== D&D 5e Spell Scraper CLI ===");
-            var spellOption = new Option<string>("--spell", "The spell to scrape") { IsRequired = true };
-            rootCommand.AddOption(spellOption);
+            var rootCommand = new RootCommand("=== D&D Character Management CLI ===");
 
-            rootCommand.SetHandler(async (string spell) =>
+            // Character super command. Acts as a menu for the other character CRUD commands
+            var characterCommand = new Command("--character", "Opens character management menu");
+            rootCommand.Add(characterCommand);
+
+            // "New" subcommand for building a new character
+            var newCharacterCommand = new Command("--new", "Build a new 5e character");
+            newCharacterCommand.SetHandler(() =>
             {
-                var spellObj = await _scraper.ScrapeSpellAsync(spell);
-                spellObj.CheckAndPrintFields();
-            }, spellOption);
+                //TODO: Add logic for building a new character
+            });
+            characterCommand.AddCommand(newCharacterCommand);
+
+
+            // "Edit" subcommand for building a new character
+            var editCharacterCommand = new Command("--edit", "Edit a 5e character");
+            editCharacterCommand.SetHandler(() =>
+            {
+                //TODO: Add logic for building a new character
+            });
+            characterCommand.AddCommand(editCharacterCommand);
+
+
+            // TODO: Continue adding commands, implement logic later
 
             return rootCommand;
         }

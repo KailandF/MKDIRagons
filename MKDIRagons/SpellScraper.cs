@@ -76,6 +76,22 @@ namespace MKDIRagons
                     }
                 }
             }
+            else
+            {
+                Console.WriteLine("Please enter the spell level: ");
+                string? spellLevel = Console.ReadLine();
+                if (spellLevel != null)
+                {
+                    spellObj.Level = spellLevel;
+                }
+
+                Console.WriteLine("Please enter the spell school: ");
+                string? spellSchool = Console.ReadLine();
+                if (spellLevel != null)
+                {
+                    spellObj.School = spellSchool;
+                }
+            }
         }
 
         private void SetCastingTime(HtmlDocument doc, Spell spellObj)
@@ -84,6 +100,15 @@ namespace MKDIRagons
             if (castingTimeNode != null)
             {
                 spellObj.CastingTime = castingTimeNode.InnerText.Trim();
+            }
+            else
+            {
+                Console.WriteLine("Please enter the Casting Time: ");
+                string? spellCastingTime = Console.ReadLine();
+                if (spellCastingTime != null)
+                {
+                    spellObj.CastingTime = spellCastingTime;
+                }
             }
         }
 
@@ -94,6 +119,15 @@ namespace MKDIRagons
             {
                 spellObj.Range = rangeNode.InnerText.Trim();
             }
+            else
+            {
+                Console.WriteLine("Please enter the spell Range: ");
+                string? spellRange = Console.ReadLine();
+                if (spellRange != null)
+                {
+                    spellObj.Range = spellRange;
+                }
+            }
         }
 
         private void SetComponents(HtmlDocument doc, Spell spellObj)
@@ -102,6 +136,15 @@ namespace MKDIRagons
             if (componentsNode != null)
             {
                 spellObj.Components = componentsNode.InnerText.Trim();
+            }
+            else
+            {
+                Console.WriteLine("Please enter the spell Components: ");
+                string? spellComponents = Console.ReadLine();
+                if (spellComponents != null)
+                {
+                    spellObj.Components = spellComponents;
+                }
             }
         }
 
@@ -112,6 +155,15 @@ namespace MKDIRagons
             {
                 spellObj.Duration = durationNode.InnerText.Trim();
             }
+            else
+            {
+                Console.WriteLine("Please enter the spell Duration");
+                string? spellDuration = Console.ReadLine();
+                if (spellDuration != null)
+                {
+                    spellObj.Duration = spellDuration;
+                }
+            }
         }
 
         private void SetDescription(HtmlDocument doc, Spell spellObj)
@@ -120,6 +172,15 @@ namespace MKDIRagons
             if (descriptionNode != null)
             {
                 spellObj.Description = descriptionNode.InnerText.Trim();
+            }
+            else
+            {
+                Console.WriteLine("Please enter the spell Description");
+                string? spellDescription = Console.ReadLine();
+                if (spellDescription != null)
+                {
+                    spellObj.Description = spellDescription;
+                }
             }
         }
 
