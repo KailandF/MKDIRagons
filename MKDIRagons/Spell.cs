@@ -13,9 +13,7 @@
         public string Description { get; set; } = string.Empty;
         public string Upcast { get; set; } = string.Empty;
 
-        public Spell()
-        {
-        }
+        public Spell() { }
         public Spell(
             string name,
             string source,

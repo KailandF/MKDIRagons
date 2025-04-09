@@ -47,7 +47,7 @@ namespace MKDIRagons
             characterCommand.AddCommand(deleteCharacterCommand);
 
             ////////// EDIT Character Commands //////////
-            
+
             // "Edit" Character subcommand for building a new character
             var editCharacterCommand = new Command("--edit", "Edit a 5e character");
             editCharacterCommand.SetHandler(() =>
@@ -141,7 +141,7 @@ namespace MKDIRagons
             inventoryEditCommand.AddCommand(listSpellCommand);
 
             ////////// SPELLBOOK super command //////////
-            
+
             // "Spellbook" super command for searching and printing a spell from the internet
             var spellbookCommand = new Command("--spellbook", "Search the internet for a spell");
             spellbookCommand.SetHandler(() =>
